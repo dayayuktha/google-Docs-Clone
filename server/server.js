@@ -1,65 +1,51 @@
-const mongoose = require("mongoose")
-const Document = require("./Document")
+// server.js
+require("dotenv").config();
 const express = require("express")
 const http = require("http")
+const mongoose = require("mongoose")
 const { Server } = require("socket.io")
+const Document = require("./Document") // assuming you have a model
+require("dotenv").config()
 
 const app = express()
-const PORT = process.env.PORT || 3001
-
-// Create HTTP server
 const server = http.createServer(app)
 
-// Attach Socket.IO to HTTP server
+// ✅ Allow frontend both locally & from Vercel
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: [
+      "http://localhost:5173",  // vite default
+      "http://localhost:3000",  // react default
+      "hhttp://google-docs-clone-yukthas-projects-b2f03858.vercel.app/documents/09ebcd85-6379-46b4-878d-87b58bbe046b", // replace with actual Vercel domain
+    ],
     methods: ["GET", "POST"],
   },
 })
 
-// MongoDB connection
-mongoose.connect("mongodb+srv://yuktha:yuktha123@cluster0.qprbajw.mongodb.net/google-docs-clone?retryWrites=true&w=majority&appName=Cluster0", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  writeConcern: { w: "majority" },
-})
-
-// Add connection event listeners
-mongoose.connection.on('connected', () => {
-  console.log('✅ Connected to MongoDB Atlas')
-})
-
-mongoose.connection.on('error', (err) => {
-  console.log('❌ MongoDB connection error:', err)
-})
-
-mongoose.connection.on('disconnected', () => {
-  console.log('⚠️ Disconnected from MongoDB')
-})
-
-// ✅ Basic route so Render doesn't 404
-app.get("/", (req, res) => {
-  res.send("🚀 Google Docs Clone backend is running!")
-})
-
-console.log(`🚀 Server running on port ${PORT}`)
-console.log('📡 Socket.io server ready for connections')
+// ✅ MongoDB connection with updated options
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+  })
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch(err => console.error("❌ MongoDB connection error:", err))
 
 const defaultValue = ""
 
 io.on("connection", socket => {
-  console.log('👤 New client connected:', socket.id)
-  
+  console.log("New client connected")
+
   socket.on("get-document", async documentId => {
     const document = await findOrCreateDocument(documentId)
     socket.join(documentId)
     socket.emit("load-document", document.data)
-    
+
     socket.on("send-changes", delta => {
       socket.broadcast.to(documentId).emit("receive-changes", delta)
     })
-    
+
     socket.on("save-document", async data => {
       await Document.findByIdAndUpdate(documentId, { data })
     })
@@ -73,7 +59,7 @@ async function findOrCreateDocument(id) {
   return await Document.create({ _id: id, data: defaultValue })
 }
 
-// ✅ Start server
+const PORT = process.env.PORT || 3001
 server.listen(PORT, () => {
-  console.log(`✅ Backend listening at http://localhost:${PORT}`)
+  console.log(`🚀 Server running on port ${PORT}`)
 })
