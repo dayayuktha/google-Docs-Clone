@@ -16,7 +16,7 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5173",  // vite default
       "http://localhost:3000",  // react default
-      "hhttp://google-docs-clone-yukthas-projects-b2f03858.vercel.app/documents/09ebcd85-6379-46b4-878d-87b58bbe046b", // replace with actual Vercel domain
+      "https://google-docs-clone-lilac-rho.vercel.app", // replace with actual Vercel domain
     ],
     methods: ["GET", "POST"],
   },
