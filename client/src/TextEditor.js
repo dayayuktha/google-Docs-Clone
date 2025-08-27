@@ -105,4 +105,6 @@ export default function TextEditor() {
   }, []);
 
   return <div className="container" ref={wrapperRef}></div>;
+  console.log("deploying....");
+
 }
