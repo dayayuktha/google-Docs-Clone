@@ -24,7 +24,7 @@ const io = new Server(server, {
 
 // ✅ MongoDB connection with updated options
 mongoose
-  .connect(process.env.MONGO_URL, {
+  .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000,
