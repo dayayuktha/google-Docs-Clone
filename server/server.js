@@ -16,9 +16,11 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5173",  // vite default
       "http://localhost:3000",  // react default
-      "https://google-docs-clone-lilac-rho.vercel.app", // replace with actual Vercel domain
+      "https://google-docs-clone-lilac-rho.vercel.app",
+      "https://google-docs-clone.vercel.app", 
     ],
     methods: ["GET", "POST"],
+    credentials: true,
   },
 })
 
